@@ -32,6 +32,18 @@ def EstPDF(data, bins=np.array([-1,0, 1]), mode='kernel', kernel='epanechnikov',
         bins_centers = bins
         return [pdf,bins_centers]
 
+# sum-Product function of list
+def sp(eff):
+    '''
+    SP of list
+        paramter is a list with all efficient of each class
+    '''
+    if (type(eff)==list):
+        eff = np.array(eff)
+    np.mean(eff)
+    prod_nroot = np.product(eff)**(1/eff.shape[0])
+    return np.sqrt(np.mean(eff)*prod_nroot)
+
 # Computing KL Divergence
 def KLDiv(p, q, bins=np.array([-1,0, 1]), mode='kernel', kernel='epanechnikov', kernel_bw=0.1):
     [p_pdf,p_bins] = EstPDF(p, bins=bins, mode='hist')
@@ -78,7 +90,7 @@ def nearest_distances(X, k=1):
     return d[:, -1] # returns the distance to the kth nearest neighbor
 
 def entropy(X, k=1):
-    ''' 
+    '''
         Returns the entropy of the X.
         Parameters
         ===========
@@ -96,7 +108,7 @@ def entropy(X, k=1):
         Kraskov A, Stogbauer H, Grassberger P. (2004). Estimating mutual
         information. Phys Rev E 69(6 Pt 2):066138.
     '''
-    
+
     # Distance to kth nearest neighbor
     X = X[:,np.newaxis]
     r = nearest_distances(X, k) # squared distances
@@ -145,22 +157,22 @@ def mutual_information_2d(x, y, sigma=1, normalized=False):
         nmi: float
         the computed similariy measure
     """
-    
+
     bins = (256, 256)
-    
+
     jh = np.histogram2d(x, y, bins=bins)[0]
-    
+
     # smooth the jh with a gaussian filter of given sigma
     ndimage.gaussian_filter(jh, sigma=sigma, mode='constant',
                             output=jh)
-        
+
     # compute marginal histograms
     jh = jh + EPS
     sh = np.sum(jh)
     jh = jh / sh
     s1 = np.sum(jh, axis=0).reshape((-1, jh.shape[0]))
     s2 = np.sum(jh, axis=1).reshape((jh.shape[1], -1))
-                            
+
     # Normalised Mutual Information of:
     # Studholme,  jhill & jhawkes (1998).
     # "A normalized entropy measure of 3-D medical image alignment".
@@ -171,5 +183,5 @@ def mutual_information_2d(x, y, sigma=1, normalized=False):
     else:
         mi = ( np.sum(jh * np.log(jh)) - np.sum(s1 * np.log(s1))
               - np.sum(s2 * np.log(s2)))
-                                    
+
     return mi
